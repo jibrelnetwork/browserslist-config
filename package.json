@@ -1,0 +1,28 @@
+{
+  "name": "@jibrelnetwork/browserslist-config",
+  "version": "0.0.1",
+  "description": "List of supported browsers and related utilities for Jibrel",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jibrelnetwork/browserslist-config.git"
+  },
+  "keywords": [
+    "browserslist-config"
+  ],
+  "author": "Jibrel AG",
+  "license": "UNLICENSED",
+  "peerDependencies": {
+    "browserslist": "^4.5.4"
+  },
+  "dependencies": {
+    "request": "2.88.0",
+    "semver-compare": "1.0.0"
+  },
+  "devDependencies": {
+    "browserslist": "4.5.4"
+  }
+}
