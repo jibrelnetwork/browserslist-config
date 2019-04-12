@@ -2,7 +2,7 @@
   "name": "@jibrelnetwork/browserslist-config",
   "version": "0.0.1",
   "description": "List of supported browsers and related utilities for Jibrel",
-  "main": "index.js",
+  "main": "utils/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

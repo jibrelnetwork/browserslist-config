@@ -4,7 +4,7 @@ const browserslistLib = require('browserslist')
 const semverCompare = require('semver-compare')
 
 const MOBILE_CONFIG_NAME = 'recommended/mobile'
-const MOBILE_CAPABILITIES = require('./recommended/mobile.browserstack.js')
+const MOBILE_CAPABILITIES = require('../recommended/mobile.browserstack.js')
 
 function isWithinVersionRange({ min, max }, version) {
   // if there is minimum and version is lower than minimum
