@@ -1,11 +1,25 @@
 const path = require('path')
-const fs = require('fs')
 const request = require('request')
 const browserslistLib = require('browserslist')
 const semverCompare = require('semver-compare')
 
 const MOBILE_CONFIG_NAME = 'recommended/mobile'
 const MOBILE_CAPABILITIES = require('./recommended/mobile.browserstack.js')
+
+function isWithinVersionRange({ min, max }, version) {
+  // if there is minimum and version is lower than minimum
+  if (min && semverCompare(min, version) > 0) {
+    return false
+  }
+
+  // if there is maximum and version is greater than minimum
+  if (max && semverCompare(max, version) < 0) {
+    return false
+  }
+
+  // in any other case it is within range
+  return true
+}
 
 module.exports.getBrowserStackCapabilitiesByConfig = ({
   browserStackUsername,
@@ -30,29 +44,22 @@ module.exports.getBrowserStackCapabilitiesByConfig = ({
   const aggregateBrowserslistConfig = browserslistConfigNames
     .map((name) => {
       if (name === MOBILE_CONFIG_NAME) {
-        return ''
+        return []
       }
 
       const filePath = path.resolve(__dirname, name)
       try {
-        return fs.readFileSync(filePath, 'utf8')
+        return require(filePath)
       } catch (err) {
         console.warn(`Could not read browserslist config specified as "${name}", skipping...`)
         if (debug) {
           console.warn(err)
         }
-        return ''
+        return []
       }
     })
-    .reduce((memo, config) => memo
-      .concat(
-        config
-          .split('\n')
-          .filter((line) => {
-            const trimmed = line.trim()
-            return !(trimmed === '' || trimmed.startsWith('#'))
-          })
-      ),
+    .reduce(
+      (memo, config) => memo.concat(config),
       [],
     )
 
@@ -63,9 +70,22 @@ module.exports.getBrowserStackCapabilitiesByConfig = ({
 
   const browsers = browserslistLib(aggregateBrowserslistConfig).map((c) => {
     const [name, version] = c.split(' ')
+
+    if (version === 'all') {
+      // there is no version limits for this browser
+      return {
+        name,
+        version: {}
+      }
+    }
+
+    const [min, max] = version.split('-')
     return {
       name,
-      version,
+      version: {
+        min,
+        max,
+      },
     }
   })
 
@@ -87,17 +107,20 @@ module.exports.getBrowserStackCapabilitiesByConfig = ({
     }
 
     body.forEach((capability) => {
+      const capability_version = capability.browser_version || capability.os_version
       if (browsers.find((b) =>
+        // capability browser name is in the list of supported browsers
         b.name === capability.browser.toLowerCase() &&
-        semverCompare(b.version, capability.browser_version) <= 0
+        isWithinVersionRange(b.version, capability_version)
       )) {
         browserStackCapabilities.push(capability)
       }
     })
 
     if (debug) {
-      console.log('Capabilities list received from BrowserStack is as follows:')
+      console.log('Filtered capabilities list received from BrowserStack is as follows:')
       console.log(JSON.stringify(browserStackCapabilities, null, '  '))
+      console.log(`Total browsers: ${browserStackCapabilities.length}`)
     }
 
     resolve(browserStackCapabilities)
