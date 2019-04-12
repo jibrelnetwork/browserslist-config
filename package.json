@@ -1,6 +1,6 @@
 {
   "name": "@jibrelnetwork/browserslist-config",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "List of supported browsers and related utilities for Jibrel",
   "main": "utils/index.js",
   "scripts": {
